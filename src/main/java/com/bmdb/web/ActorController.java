@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.bmdb.business.Actor;
 import com.bmdb.db.ActorRepo;
@@ -25,9 +27,15 @@ public class ActorController {
 	
 	// Get actor by id
 	@GetMapping("/{ID}")
-	public Optional getActor(@PathVariable int ID) {
+	public Optional<Actor> getActor(@PathVariable int ID) {
 		Optional<Actor> a = actorRepo.findById(ID);
-		return a;
+		if (a.isPresent()) {
+			return a;
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Actor not found");
+		}
+		
 	}
 	
 	// Add a actor
@@ -44,8 +52,9 @@ public class ActorController {
 	
 	// Delete a actor
 	@DeleteMapping("/")
-	public void deleteActor(@RequestBody Actor a) {
+	public Actor deleteActor(@RequestBody Actor a) {
 		actorRepo.delete(a);
+		return a;
 	}
 	
 }
