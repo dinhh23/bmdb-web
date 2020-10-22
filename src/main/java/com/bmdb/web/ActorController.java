@@ -13,7 +13,7 @@ import com.bmdb.db.ActorRepo;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/actors")
+@RequestMapping("/api/actors")
 public class ActorController {
 	
 	@Autowired
@@ -45,15 +45,26 @@ public class ActorController {
 	}
 	
 	// Update a actor
-	@PutMapping("/")
-	public Actor updateActor(@RequestBody Actor a) {
-		return actorRepo.save(a);
+	@PutMapping("/{ID}")
+	public Actor updateActor(@RequestBody Actor a, @PathVariable int ID) {
+		if (ID == a.getid()) {
+			return actorRepo.save(a);
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Actor id does not match");
+		}
 	}
 	
 	// Delete a actor
-	@DeleteMapping("/")
-	public Actor deleteActor(@RequestBody Actor a) {
-		actorRepo.delete(a);
+	@DeleteMapping("/{ID}")
+	public Optional<Actor> deleteActor(@PathVariable int ID) {
+		Optional<Actor> a = actorRepo.findById(ID);
+		if (a.isPresent()) {
+			actorRepo.deleteById(ID);
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Actor not found");
+		}
 		return a;
 	}
 	

@@ -1,6 +1,6 @@
 package com.bmdb.web;
 
-import java.util.List; 
+import java.util.List;  
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +13,7 @@ import com.bmdb.db.MovieRepo;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/movies")
+@RequestMapping("/api/movies")
 public class MovieController {
 	
 	@Autowired
@@ -23,6 +23,12 @@ public class MovieController {
 	@GetMapping("/")
 	public List<Movie> getAllMovies() {
 		return movieRepo.findAll();
+	}
+	
+	// List all movies by rating
+	@GetMapping("")
+	public List<Movie> getAllMoviesByRating(@RequestParam String rating) {
+		return movieRepo.findByRating(rating);
 	}
 	
 	// Get movie by id
@@ -37,7 +43,6 @@ public class MovieController {
 		}
 	}
 	
-	
 	// Add a movie
 	@PostMapping("/")
 	public Movie addMovie(@RequestBody Movie m) {
@@ -45,15 +50,26 @@ public class MovieController {
 	}
 	
 	// Update a movie
-	@PutMapping("/")
-	public Movie updateMovie(@RequestBody Movie m) {
-		return movieRepo.save(m);
+	@PutMapping("/{ID}")
+	public Movie updateMovie(@RequestBody Movie m, @PathVariable int ID) {
+		if (ID == m.getID()) {
+			return movieRepo.save(m);
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie id does not match");
+		}
 	}
 	
 	// Delete a movie
-	@DeleteMapping("/")
-	public Movie deleteMovie(@RequestBody Movie m) {
-		movieRepo.delete(m);
+	@DeleteMapping("/{ID}")
+	public Optional<Movie> deleteMovie(@PathVariable int ID) {
+		Optional<Movie> m = movieRepo.findById(ID);
+		if (m.isPresent()) {
+			movieRepo.deleteById(ID);
+		}
+		else {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Actor not found");
+		}
 		return m;
 	}
 	
